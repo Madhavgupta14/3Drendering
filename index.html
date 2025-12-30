@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Hand FX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <h1>SOLAR COMMAND</h1>
+            </header>
+
+            <div class="sidebar-content">
+                <div class="mode-buttons">
+                    <button class="active" data-btn="speed-normal">REAL TIME</button>
+                    <button data-btn="speed-fast">WARP SPEED</button>
+                </div>
+                <div class="status">
+                    <span class="star">☆</span> Hand Tracking Active
+                </div>
+
+                <div class="controls-section">
+                    <div class="control-group">
+                        <label>Asteroid Density</label>
+                        <div class="value-toggle">
+                            <button class="mini-btn" id="remove-ring"
+                                style="font-size: 1.2rem; font-weight: bold;">-</button>
+                            <span class="value" id="ring-count">0</span>
+                            <button class="mini-btn" id="add-ring"
+                                style="font-size: 1.2rem; font-weight: bold;">+</button>
+                        </div>
+                        <div class="sub-label"><span class="star">☆</span> ASTEROID BELT</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Navigation Mode</label>
+                        <div class="value-toggle">
+                            <span class="value">Active</span>
+                            <label class="switch">
+                                <input type="checkbox" checked id="toggle-inner">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="sub-label"><span class="star">☆</span> ORBITAL LINES</div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="value-toggle">
+                            <span>Gyro Control</span>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-gyro" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="sub-label">Hand Tilt Axis</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Hand Guide</label>
+                        <div class="hand-instructions">
+                            <div class="instruction-item">
+                                <span class="icon">🤏</span>
+                                <span class="text"><strong>Pinch</strong> to Zoom</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="icon">🔄</span>
+                                <span class="text"><strong>Tilt</strong> to Rotate</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="icon">✋</span>
+                                <span class="text"><strong>Open</strong> to Pan</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>View Commands</label>
+                        <div class="value-toggle">
+                            <label class="switch">
+                                <input type="checkbox" checked id="toggle-grid">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="mini-buttons">
+                            <button class="mini-btn active" data-btn="view-top">TOP VIEW</button>
+                            <button class="mini-btn" data-btn="view-side">SIDE VIEW</button>
+                            <button class="mini-btn" data-btn="view-free">FREE LOOK</button>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn active" data-btn="filter-sun">SUN FILTER</button>
+                        <button class="action-btn" data-btn="reset-view">RESET</button>
+                    </div>
+                </div>
+
+                <div class="video-feed-1">
+                    <video id="feed-sidebar" autoplay playsinline muted></video>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Stage -->
+        <main class="main-stage">
+            <canvas id="starfield"></canvas>
+            <div class="top-bar">
+                <span>Interactive Geometric Hand FX</span>
+            </div>
+
+            <!-- Tooltip container -->
+            <div id="planet-tooltip" class="planet-tooltip">
+                <h3 id="tooltip-name">Earth</h3>
+                <p><span class="label">Age:</span> <span id="tooltip-age">4.54 Billion Years</span></p>
+            </div>
+
+            <div class="visualization-area">
+                <div class="floating-label">
+                    <span>&#x2302;</span> Orbitron Sound 7ant Djole
+                </div>
+
+                <!-- 3D Object Container -->
+                <div class="scene">
+                    <div class="control-scale-wrapper">
+                        <!-- WebGL Canvas for Three.js -->
+                        <div id="canvas-container" style="width: 100%; height: 100%;"></div>
+                    </div>
+
+                    <!-- Background Grid -->
+                    <div class="grid-floor"></div>
+                    <div class="mountains"></div>
+
+                    <div class="bottom-controls">
+                        <div class="slider-container">
+                            <div class="slider-track">
+                                <div class="slider-thumb left"></div>
+                                <div class="slider-bar"></div>
+                                <div class="slider-thumb right"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

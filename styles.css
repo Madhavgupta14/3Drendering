@@ -1,0 +1,745 @@
+:root {
+    --bg-color: #0d0d25;
+    --sidebar-bg: #14142e;
+    --text-primary: #e0e0ff;
+    --text-secondary: #8a8ab5;
+    --neon-cyan: #00f3ff;
+    --neon-pink: #d800ff;
+    --neon-blue: #0088ff;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --font-main: 'Orbitron', sans-serif;
+}
+
+/* Theme Override */
+body.theme-gold {
+    --neon-cyan: #ffd700;
+    --neon-pink: #ff4500;
+    --neon-blue: #ff8c00;
+    --bg-color: #1a0500;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    height: 100vh;
+    overflow: hidden;
+    transition: background-color 0.5s ease;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 320px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    z-index: 10;
+    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    /* Allow scrolling if content is too tall */
+    scrollbar-width: thin;
+    /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 2px;
+}
+
+.sidebar-header {
+    margin-bottom: 30px;
+}
+
+.dots {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.red {
+    background-color: #ff5f56;
+}
+
+.yellow {
+    background-color: #ffbd2e;
+}
+
+.green {
+    background-color: #27c93f;
+}
+
+h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-primary);
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.mode-buttons button {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    padding: 8px 5px;
+    font-size: 0.6rem;
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mode-buttons button.active {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.controls-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.control-group label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.value-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.value {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--neon-cyan);
+}
+
+input:checked+.slider:before {
+    transform: translateX(20px);
+}
+
+.sub-label {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+
+.mini-buttons,
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.mini-btn,
+.action-btn {
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    padding: 5px 8px;
+    font-size: 0.6rem;
+    font-family: var(--font-main);
+    cursor: pointer;
+}
+
+.mini-btn.active,
+.action-btn.active {
+    background: var(--neon-cyan);
+    color: #000;
+    border-color: var(--neon-cyan);
+    font-weight: bold;
+}
+
+.action-btn {
+    padding: 8px 15px;
+    flex: 1;
+    text-align: center;
+}
+
+.video-feed-1 {
+    width: 100%;
+    height: 150px;
+    /* Fixed height to prevent squash/stretch issues */
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #333;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    flex-shrink: 0;
+    /* Prevent shrinking */
+    margin-top: 20px;
+}
+
+.video-feed-1:after {
+    content: "REC";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: red;
+    font-size: 0.7rem;
+    font-weight: bold;
+    animation: blink 1s infinite;
+    z-index: 5;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.hand-instructions {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+}
+
+.instruction-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 0;
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.instruction-item .icon {
+    font-size: 1rem;
+    width: auto;
+}
+
+.instruction-item strong {
+    color: var(--neon-cyan);
+    display: block;
+    font-size: 0.65rem;
+}
+
+/* Main Stage Styles */
+.main-stage {
+    flex: 1;
+    position: relative;
+    background: radial-gradient(circle at center, #0b1021 0%, #000000 100%);
+    overflow: hidden;
+}
+
+#starfield {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    z-index: 10;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.visualization-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+    overflow: hidden;
+}
+
+.floating-label {
+    position: absolute;
+    top: 15%;
+    left: 10%;
+    border-left: 3px solid var(--neon-cyan);
+    padding: 10px 20px;
+    background: rgba(0, 243, 255, 0.05);
+    backdrop-filter: blur(2px);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.floating-label span {
+    color: var(--neon-cyan);
+    margin-right: 10px;
+}
+
+.grid-floor {
+    position: absolute;
+    bottom: -20%;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background:
+        linear-gradient(rgba(0, 136, 255, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 136, 255, 0.15) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: rotateX(75deg);
+    transform-origin: 50% 100%;
+    z-index: 1;
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 0) 80%);
+    animation: gridMove 20s infinite linear;
+    transition: opacity 0.5s ease;
+}
+
+.grid-floor.hidden {
+    opacity: 0;
+}
+
+@keyframes gridMove {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 50px;
+    }
+}
+
+.mountains {
+    position: absolute;
+    bottom: 25%;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    background:
+        repeating-linear-gradient(90deg,
+            transparent 0,
+            transparent 40px,
+            rgba(0, 136, 255, 0.03) 40px,
+            rgba(0, 136, 255, 0.03) 41px),
+        linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 136, 255, 0.05));
+    z-index: 0;
+    clip-path: polygon(0% 100%, 0% 80%, 10% 40%, 20% 70%, 30% 30%, 40% 60%, 50% 20%, 60% 50%, 70% 30%, 80% 60%, 90% 40%, 100% 70%, 100% 100%);
+    opacity: 0.5;
+}
+
+/* 3D Scene - Solar System Style */
+.scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    perspective: 1000px;
+}
+
+.control-scale-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: none;
+    /* Removed fixed scale to fill screen */
+    perspective: 1000px;
+}
+
+.p3d {
+    transform-style: preserve-3d;
+}
+
+.solar-system {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+/* Sun */
+.sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #ffd700, #ff4500);
+    box-shadow: 0 0 60px #ff4500, 0 0 100px #ffd700;
+    animation: pulseSun 4s infinite alternate;
+}
+
+@keyframes pulseSun {
+    from {
+        box-shadow: 0 0 50px #ff4500;
+    }
+
+    to {
+        box-shadow: 0 0 80px #ff4500, 0 0 120px #ffd700;
+    }
+}
+
+/* Orbits */
+.orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    transform-style: preserve-3d;
+}
+
+/* Planet positioning logic: Planet is child of Orbit. 
+   We center it in the orbit so JS can apply X/Y coordinates from that center (Sun). */
+.planet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Center in orbit */
+    right: auto;
+    /* Reset usage of right:0 */
+    transform: translate(-50%, -50%);
+    /* Center the element itself */
+    border-radius: 50%;
+    box-shadow: inset -3px -3px 5px rgba(0, 0, 0, 0.7);
+}
+
+/* Orbit Sizes (Visual Only) - Animation handled in JS now */
+.orbit-mercury {
+    width: 120px;
+    height: 120px;
+}
+
+.orbit-venus {
+    width: 180px;
+    height: 180px;
+}
+
+.orbit-earth {
+    width: 260px;
+    height: 260px;
+}
+
+.orbit-mars {
+    width: 340px;
+    height: 340px;
+}
+
+.orbit-jupiter {
+    width: 500px;
+    height: 500px;
+}
+
+.orbit-saturn {
+    width: 650px;
+    height: 650px;
+}
+
+.orbit-uranus {
+    width: 750px;
+    height: 750px;
+}
+
+.orbit-neptune {
+    width: 850px;
+    height: 850px;
+}
+
+/* Planet Styles - Realistic Textures */
+.mercury {
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at 30% 30%, #e2e2e2 0%, #8c8c8c 50%, #2f2f2f 100%);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.venus {
+    width: 18px;
+    height: 18px;
+    background: radial-gradient(circle at 30% 30%, #ffefd5 0%, #e3bb76 40%, #8b5a2b 100%);
+    box-shadow: 0 0 8px rgba(227, 187, 118, 0.4);
+}
+
+.earth {
+    width: 20px;
+    height: 20px;
+    /* Complex Gradient for Earth-like appearance */
+    background:
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.8) 0%, transparent 20%),
+        /* Cloud */
+        radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.6) 0%, transparent 15%),
+        /* Cloud */
+        radial-gradient(circle at 50% 50%, #4da6ff 0%, #0066cc 60%, #001133 100%);
+    /* Ocean */
+    box-shadow: 0 0 10px rgba(77, 166, 255, 0.4);
+}
+
+.mars {
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle at 30% 30%, #ff7355 0%, #dd4422 50%, #5e1e12 100%);
+    box-shadow: 0 0 8px rgba(221, 68, 34, 0.4);
+}
+
+.jupiter {
+    width: 50px;
+    height: 50px;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 60%),
+        /* Lighting */
+        repeating-linear-gradient(180deg,
+            #bf9e76 0%,
+            #eac89a 10%,
+            #8c6a46 20%,
+            #bf9e76 30%);
+    background-blend-mode: overlay;
+    box-shadow: 0 0 15px rgba(191, 158, 118, 0.3);
+}
+
+.saturn {
+    width: 42px;
+    height: 42px;
+    background: radial-gradient(circle at 30% 30%, #fcecce 0%, #e0c896 50%, #947e50 100%);
+    box-shadow: 0 0 12px rgba(244, 208, 63, 0.3);
+}
+
+.uranus {
+    width: 26px;
+    height: 26px;
+    background: radial-gradient(circle at 30% 30%, #e0ffff 0%, #73fcd6 50%, #228866 100%);
+    box-shadow: 0 0 10px rgba(115, 252, 214, 0.4);
+}
+
+.neptune {
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle at 30% 30%, #85afff 0%, #4b70dd 50%, #112255 100%);
+    box-shadow: 0 0 10px rgba(75, 112, 221, 0.5);
+}
+
+/* Saturn Ring - Improved */
+.saturn-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotateX(75deg);
+    width: 80px;
+    height: 80px;
+    background: transparent;
+    border: 8px solid rgba(190, 170, 100, 0.5);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(190, 170, 100, 0.2);
+    pointer-events: none;
+}
+
+/* Earth Moon */
+.moon {
+    position: absolute;
+    top: 50%;
+    left: 180%;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle at 30% 30%, #fff, #bbb);
+    border-radius: 50%;
+}
+
+/* Removed @keyframes spinOrbit to allow JS control */
+.bottom-controls {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 50px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(13, 13, 37, 0.9);
+    z-index: 10;
+    box-shadow:
+        0 0 10px rgba(0, 243, 255, 0.3),
+        inset 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
+.slider-track {
+    width: 85%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.slider-bar {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    height: 100%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    border-radius: 3px;
+}
+
+.slider-thumb {
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: 0 0 15px var(--neon-cyan);
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.slider-thumb.left {
+    left: 10px;
+}
+
+.slider-thumb.right {
+    right: 10px;
+}
+
+/* Tooltip */
+.planet-tooltip {
+    position: absolute;
+    background: rgba(13, 13, 37, 0.9);
+    border: 1px solid var(--neon-cyan);
+    padding: 15px;
+    border-radius: 8px;
+    pointer-events: none;
+    /* Let mouse pass through to canvas */
+    display: none;
+    z-index: 100;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    backdrop-filter: blur(5px);
+    width: 200px;
+}
+
+.planet-tooltip h3 {
+    color: var(--neon-cyan);
+    margin-bottom: 5px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+}
+
+.planet-tooltip p {
+    color: var(--text-primary);
+    font-size: 0.8rem;
+}
+
+.planet-tooltip .label {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    margin-right: 5px;
+}
