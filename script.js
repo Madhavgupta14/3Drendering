@@ -78,9 +78,17 @@ function initSolarSystem() {
 
         // SUN
         const sunGeo = new THREE.SphereGeometry(30, 64, 64);
-        const sunMat = new THREE.MeshBasicMaterial({
-            color: 0xffdd00, // Yellow core
-        });
+        // Replace Basic Material with Shader Material (Applying definition from below - hoisting issue? 
+        // No, we need to move sun creation DOWN or define shader UP.
+        // I will use a placeholder here and switch the material after shaders are defined.)
+        // ACTUALLY, simpler: I'll define a function to update the sun material later, or just init it here with a basic one 
+        // content of this block is executed inside initSolarSystem. 
+        // The shaders are defined WAY further down. This IS a hoisting issue if I try to use them here.
+        // Let's swap the Basic Material for the Shader Material *at the end of init*, or move the object creation down.
+        // Moving object creation is risky for references. 
+        // I will keep Basic here and upgrade it at the bottom.
+
+        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
         const sunMesh = new THREE.Mesh(sunGeo, sunMat);
         sunMesh.userData = { name: "Sun", age: "4.603 Billion Years" }; // Data
 
@@ -192,9 +200,10 @@ function initSolarSystem() {
             
             // Base Color (Ocean Blue + simple land noise)
             float landNoise = snoise(vec3(vUv.x * 3.0, vUv.y * 3.0, 0.0));
-            vec3 ocean = vec3(0.0, 0.3, 0.7);
-            vec3 land = vec3(0.2, 0.6, 0.2);
-            vec3 base = mix(ocean, land, smoothstep(0.1, 0.2, landNoise));
+            // Reference Image: Vibrant Blue Water, Green-Brown Land
+            vec3 ocean = vec3(0.0, 0.2, 0.8); // Brighter Blue
+            vec3 land = vec3(0.1, 0.5, 0.1);  // Green
+            vec3 base = mix(ocean, land, smoothstep(0.15, 0.25, landNoise));
 
             // Mix Base + Clouds
             vec3 planetColor = mix(base, vec3(1.0), cloud);
@@ -329,25 +338,64 @@ function initSolarSystem() {
         }
         `;
 
-        // PLANET CONFIGURATIONS (Updated Colors for Realism)
+        // 3. SUN SHADER (Fiery Plasma)
+        const sunFragmentShader = `
+        uniform float uTime;
+        varying vec2 vUv;
+        varying vec3 vNormalWorld;
+        varying vec3 vWorldPosition;
+        ${noiseGLSL}
+
+        void main() {
+            // Animated Surface Noise
+            float n = snoise(vWorldPosition * 0.2 + vec3(0.0, 0.0, uTime * 0.2));
+            float n2 = snoise(vWorldPosition * 0.4 - vec3(uTime * 0.1, 0.0, 0.0));
+            
+            // Mix noise layers
+            float noiseVal = n * 0.6 + n2 * 0.4;
+            
+            // Color Ramp: Bright Yellow Core -> Orange -> Reddish Perimeter
+            vec3 core = vec3(1.0, 1.0, 0.6); // White-Yellow
+            vec3 mid = vec3(1.0, 0.6, 0.1);  // Gold-Orange
+            vec3 edge = vec3(0.8, 0.1, 0.0); // Red-Orange
+            
+            // Radial gradient based on view angle (Fresnel-like) to simulate heat depth
+            float viewAngle = dot(normalize(vNormalWorld), vec3(0,0,1));
+            float heat = smoothstep(0.0, 1.0, viewAngle + noiseVal * 0.2);
+            
+            vec3 col = mix(edge, mid, heat);
+            col = mix(col, core, smoothstep(0.8, 1.2, heat)); // Core hot spot
+
+            // Add Solar Flares (bright spots)
+            float flare = smoothstep(0.7, 1.0, n2);
+            col += vec3(0.5, 0.4, 0.2) * flare;
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+        `;
+
+        // PLANET CONFIGURATIONS (Reference Image Matching)
         const planetConfigs = {
-            "Mercury": { type: 'rocky', c1: 0x8c7c6e, c2: 0x5e5a5a, scale: 0.8 },
-            "Venus": { type: 'rocky', c1: 0xe3bb76, c2: 0xc18f5a, scale: 0.3 },
-            "Mars": { type: 'rocky', c1: 0xc1440e, c2: 0x652207, scale: 0.6 },
+            // Mercury: Brownish/Tan, Textured
+            "Mercury": { type: 'rocky', c1: 0x9e8770, c2: 0x5c4d42, scale: 0.8 },
 
-            // Jupiter: Creamy Beige, Brown-Red, Dark Tan
-            "Jupiter": { type: 'gas', c1: 0xe3dccb, c2: 0xcd9b76, c3: 0x8f7c6b, bands: 12.0 },
+            // Venus: Golden Orange/Brown, Swirling
+            "Venus": { type: 'rocky', c1: 0xd9863d, c2: 0xa65e2e, scale: 0.4 },
 
-            // Saturn: Pale Gold, Muted Beige, Grey-Tan
-            "Saturn": { type: 'gas', c1: 0xe8dcb6, c2: 0xcbb7b0, c3: 0xa89f91, bands: 10.0, rings: true },
+            // Mars: Dusty Rust/Red
+            "Mars": { type: 'rocky', c1: 0xc1440e, c2: 0x8b3a1a, scale: 0.6 },
 
-            // Uranus: Very Subtle Pale Blue-Green Gradient
-            // c1: Main Pale Blue, c2: Slightly Deeper Cyan, c3: White Haze
-            "Uranus": { type: 'gas', c1: 0xd1f2f8, c2: 0xb5e6eb, c3: 0xffffff, bands: 2.0 }, // Bands reduced to 2.0 for smooth look
+            // Jupiter: Cream & Dark Brown stripes (High Contrast)
+            "Jupiter": { type: 'gas', c1: 0xe3dccb, c2: 0x8c4718, c3: 0xcd853f, bands: 10.0 },
 
-            // Neptune: Rich Deep Azure with Storms
-            // c1: Base Blue, c2: Darker/Richer Blue, c3: Bright Storm White/Cyan
-            "Neptune": { type: 'gas', c1: 0x3e54e8, c2: 0x2b3fa0, c3: 0x76b6c4, bands: 4.0 } // Bands reduced slightly, high contrast storms
+            // Saturn: Golden Yellow & Tan
+            "Saturn": { type: 'gas', c1: 0xf4d03f, c2: 0xcdb87d, c3: 0xbf9b30, bands: 8.0, rings: true },
+
+            // Uranus: Solid Light Cyan/Blue (Clean)
+            "Uranus": { type: 'gas', c1: 0x73fcd6, c2: 0x5ec4d6, c3: 0xa2c8c9, bands: 1.5 },
+
+            // Neptune: Deep Royal Blue
+            "Neptune": { type: 'gas', c1: 0x1d37b8, c2: 0x172280, c3: 0x4b70dd, bands: 3.0 }
         };
 
         // PLANET FACTORY
@@ -356,11 +404,22 @@ function initSolarSystem() {
             let mat;
             let mesh;
 
-            // 1. EARTH (Special Case)
+            // 0. SUN (Special Case if we were using this factory for it, but Sun is separate. 
+            // Wait, implementation plan says update Sun too.
+            // But Sun is created manually above line 80.
+            // I should update the Sun Material *after* this config update.)
+
+            // 1. EARTH (Special Case: Vibrant Blue/Green)
             if (name === "Earth") {
                 mat = new THREE.ShaderMaterial({
                     uniforms: {
                         uTime: { value: 0 },
+                        // Ocean: 0x0000ff -> Deep Blue, Land: 0x00ff00 -> Vibrant Green
+                        // We need to pass these to the earth shader or hardcode them there.
+                        // Currently Earth shader has hardcoded colors. I should probably allow injection 
+                        // or just tweak the shader itself.
+                        // Let's rely on the Earth Fragment Shader edit coming up or assume it's "good enough" 
+                        // but the user said "from pic". Pic Earth is very blue/green.
                         uBaseColor: { value: new THREE.Color(fallbackColor) }
                     },
                     vertexShader: planetVertexShader,
@@ -619,7 +678,27 @@ function initSolarSystem() {
                 }
             });
 
-            // Shooting Stars Animation (Part 3) - Placeholder for next step
+            // Update Sun Shader Time
+            if (sunMesh.material.uniforms) {
+                sunMesh.material.uniforms.uTime.value = Date.now() * 0.001;
+            }
+
+            // ------------------------------------------------
+            // LATE BINDING: UPGRADE SUN MATERIAL
+            // ------------------------------------------------
+            // Now that shaders are defined, let's swap the Sun's material
+            const fierySunMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 }
+                },
+                vertexShader: planetVertexShader, // Reuse the standard one (pass normal/worldPos)
+                fragmentShader: sunFragmentShader  // The new fiery one
+            });
+            sunMesh.material = fierySunMat;
+
+
+            // SHOOTING STARS ANIMATION
+            if (Math.random() < 0.02) spawnComet(); // 2% chance per frame
 
             renderer.render(scene, camera);
         }
