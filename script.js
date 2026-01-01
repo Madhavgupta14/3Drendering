@@ -25,10 +25,11 @@ function initSolarSystem() {
         camera.lookAt(0, 0, 0);
 
         // Renderer
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: "high-performance" }); // Disabled Anti-alias for FPS
         renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap at 1.5x, don't use full retina
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Keep soft shadows but lower res map defined above
         container.appendChild(renderer.domElement);
 
         // Resize Handler
@@ -63,8 +64,9 @@ function initSolarSystem() {
         const sunLight = new THREE.PointLight(0xffffff, 1.5, 3000);
         sunLight.position.set(0, 0, 0);
         sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
+        // OPTIMIZATION: Reduced Shadow Map from 2048 to 1024
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
         scene.add(sunLight);
 
         // --------------------------------------------------------
@@ -400,7 +402,8 @@ function initSolarSystem() {
 
         // PLANET FACTORY
         function createPlanet(name, size, fallbackColor, distance, speed, age) {
-            const geo = new THREE.SphereGeometry(size, 64, 64);
+            // OPTIMIZATION: Reduced segments from 64 to 32
+            const geo = new THREE.SphereGeometry(size, 32, 32);
             let mat;
             let mesh;
 
